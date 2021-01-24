@@ -19,6 +19,8 @@ jobs:
           chmod +x ./kubectl
           mkdir -p ~/.kube
           echo "${KUBECONFIG_CONTENT}" > ~/.kube/config
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
       - name: Applying Kubernetes objects
         run: |-
           ./kubectl version --client
