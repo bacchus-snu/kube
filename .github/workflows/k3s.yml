@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - deploy
+    paths:
+      - 'k8s/**'
   # Can be triggered manually from the Actions tab
   workflow_dispatch:
 
@@ -30,7 +32,7 @@ jobs:
           kubectl version
           kubectl get nodes
           kubectl get pods
-          kubectl diff -f ./
+          kubectl diff -f ./k8s/
       - name: Applying Kubernetes objects
         run: |-
-          kubectl apply -f ./
+          kubectl apply -f ./k8s/
