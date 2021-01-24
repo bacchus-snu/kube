@@ -13,10 +13,14 @@ jobs:
     name: Applying Kubernetes objects
     runs-on: ubuntu-latest
     steps:
-      - name: Installing kubectl binary
+      - name: Configuring kubectl
         run: |-
           curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x ./kubectl
+          mkdir -p ~/.kube
+          echo "${KUBECONFIG_CONTENT}" > ~/.kube/config
       - name: Applying Kubernetes objects
         run: |-
           ./kubectl version --client
+          ./kubectl get pods
+          ./kubectl get nodes
