@@ -1,0 +1,22 @@
+name: Deploy to K3s
+
+on:
+  # Triggered on push to "deploy" branch
+  push:
+    branches:
+      - deploy
+  # Can be triggered manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Applying Kubernetes objects
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installing Kubectl binary
+        run: |-
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+      - name: Applying Kubernetes objects
+        run: |-
+          ./kubectl version --client
