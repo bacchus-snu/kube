@@ -1,0 +1,31 @@
+name: 🚨 Prune orphan objects 🚨
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Pruning orphan objects
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configuring kubectl
+        run: |-
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          mkdir -p ~/.local/bin/
+          mv ./kubectl ~/.local/bin/
+          mkdir -p ~/.kube
+          echo "${KUBECONFIG_CONTENT}" > ~/.kube/config
+          echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
+      - uses: actions/checkout@v2
+      - name: Reporting current status
+        run: |-
+          kubectl version
+          kubectl get nodes
+          kubectl get pods
+          kubectl diff -R -f ./k8s/ || :
+      - name: Pruning Kubernetes objects
+        run: |-
+          kubectl apply -R -f ./k8s/ --prune --all
