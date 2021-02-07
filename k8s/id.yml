@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: id
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: id
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13-alpine
+        env:
+        - name: POSTGRES_USER
+          value: id
+        - name: POSTGRES_PASSWORD
+          value: foo # for testing
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: id
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+      - name: core
+        image: ghcr.io/tirr-c/id-core@sha256:c2d2fcb4d1d9ad5de891cc9800553b690af5a892c3341358441eab8af56f6477
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.json
+          subPath: core
+      volumes:
+      - name: config
+        configMap:
+          name: config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: id
+data:
+  core: |
+    {
+      "instanceName": "id-core",
+      "logLevel": 30,
+      "api": {
+        "listenHost": "0.0.0.0",
+        "listenPort": "50080",
+        "proxy": true
+      },
+      "session": {
+        "key": "id-session",
+        "maxAge": 3600000,
+        "signed": true,
+        "rolling": false,
+        "renew": true
+      },
+      "email": {
+        "host": "smtp.gmail.com",
+        "username": "INSERT_USERNAME_HERE",
+        "password": "INSERT_PASSWORD_HERE",
+        "resendLimit": 3,
+        "verificationEmailSubject": "id.snucse.org 이메일 인증",
+        "passwordChangeEmailSubject": "id.snucse.org 비밀번호 변경",
+        "verificationEmailUrl": "https://id.snucse.org/sign-up",
+        "passwordChangeEmailUrl": "https://id.snucse.org/change-password"
+      },
+      "posix": {
+        "userGroupName": "cseusers",
+        "userGroupGid": 101132,
+        "sudoerGroupName": "csesudoers",
+        "sudoerGroupGid": 100600,
+        "defaultShell": "/bin/bash",
+        "minUid": 100000,
+        "homeDirectoryPrefix": "/csehome"
+      },
+      "postgresql": {
+        "host": "db",
+        "port": 5432,
+        "user": "id",
+        "password": "foo",
+        "database": "id"
+      },
+      "permissions": {
+        "snucse": 1
+      }
+    }
