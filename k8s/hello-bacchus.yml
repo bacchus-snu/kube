@@ -33,7 +33,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hello-bacchus
+  annotations:
+    cert-manager.io/issuer: letsencrypt-staging
 spec:
+  tls:
+  - hosts:
+    - kube.bacchus.io
+    secretName: hello-bacchus-tls
   rules:
   - host: kube.bacchus.io
     http:
