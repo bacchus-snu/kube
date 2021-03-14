@@ -28,4 +28,4 @@ jobs:
           kubectl diff -R -f ./k8s/ || :
       - name: Pruning Kubernetes objects
         run: |-
-          kubectl apply -R -f ./k8s/ --prune --all
+          kubectl apply -R -f ./k8s/ -f ./infra/ --prune --all
