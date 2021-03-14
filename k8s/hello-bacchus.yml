@@ -21,10 +21,26 @@ kind: Service
 metadata:
   name: hello-bacchus
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: hello-bacchus
   ports:
     - protocol: TCP
       port: 8081
       targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-bacchus
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-bacchus
+            port:
+              number: 8081
