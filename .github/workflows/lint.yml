@@ -35,4 +35,4 @@ jobs:
       - uses: actions/checkout@v2
       - name: Applying Kubernetes objects (dry-run)
         run: |-
-          kubectl apply --dry-run=client -R -f ./k8s/ -f ./infra/
+          kubectl apply --dry-run=server -R -f ./k8s/ -f ./infra/
