@@ -17,6 +17,7 @@ jobs:
           DEFAULT_BRANCH: deploy
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_KUBERNETES_KUBEVAL: 'false'
+          VALIDATE_JSCPD: 'false'
   check-kube:
     name: Check kubernetes resource definitions
     runs-on: ubuntu-latest
