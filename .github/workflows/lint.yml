@@ -1,0 +1,38 @@
+name: Run linter
+
+on: pull_request
+
+jobs:
+  super-lint:
+    name: Lint code base
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Super-Linter
+        uses: github/super-linter@v3
+        env:
+          DEFAULT_BRANCH: deploy
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_KUBERNETES_KUBEVAL: 'false'
+  check-kube:
+    name: Check kubernetes resource definitions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configuring kubectl
+        run: |-
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          mkdir -p ~/.local/bin/
+          mv ./kubectl ~/.local/bin/
+          mkdir -p ~/.kube
+          echo "${KUBECONFIG_CONTENT}" > ~/.kube/config
+          echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
+      - uses: actions/checkout@v2
+      - name: Applying Kubernetes objects (dry-run)
+        run: |-
+          kubectl apply --dry-run=client -R -f ./k8s/ -f ./infra/
